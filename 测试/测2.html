@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>生日快乐 | 专属我们的时光轴</title>
+    <!-- 引入Font Awesome 6 (免费图标库) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 使用Google Fonts提升字体质感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖动干扰，不影响文字复制，可选 */
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffeff7;  /* 粉丝背景打底 */
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* ----- 粉丝渐变背景 + 动态爱心粒子 ----- */
+        .fan-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #ffe6f0 0%, #ffc0de 100%);
+            z-index: -2;
+        }
+
+        /* 浮动爱心动画容器 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 1.2rem;
+            color: #ff99bb;
+            opacity: 0.6;
+            animation: floatHeart 8s linear infinite;
+            filter: drop-shadow(0 0 3px #ff3b6f);
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) scale(0.6);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 头部祝福语 */
+        .hero {
+            text-align: center;
+            margin: 20px 0 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+        .hero h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.2rem;
+            background: linear-gradient(135deg, #e84393, #ff6f91);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 12px rgba(255, 80, 120, 0.2);
+            letter-spacing: 2px;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #b34167;
+            margin-top: 10px;
+            font-weight: 500;
+            background: rgba(255,255,240,0.5);
+            display: inline-block;
+            padding: 5px 18px;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+        }
+
+        /* 音乐播放器卡片 */
+        .music-player {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 56px;
+            padding: 12px 20px;
+            margin: 20px auto 40px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(255, 105, 145, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            max-width: 550px;
+        }
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .play-btn {
+            background: #ff6f91;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .play-btn:hover {
+            background: #e84393;
+            transform: scale(1.05);
+        }
+        .audio-info {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #b13e66;
+            background: rgba(255,235,245,0.8);
+            padding: 6px 15px;
+            border-radius: 30px;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .upload-music {
+            background: #ffb7c5;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #8e3b56;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .upload-music:hover {
+            background: #ff98b3;
+        }
+        input[type="file"] {
+            display: none;
+        }
+
+        /* 时间轴样式 (垂直优雅风格) */
+        .timeline {
+            position: relative;
+            margin: 50px 0;
+            padding-left: 20px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 20px;
+            bottom: 20px;
+            width: 4px;
+            background: linear-gradient(to bottom, #ff9eb5, #ff4d6d);
+            border-radius: 4px;
+            box-shadow: 0 0 6px #ff98b9;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 55px;
+            display: flex;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.5s ease backwards;
+            animation-delay: calc(0.1s * var(--order));
+        }
+        .timeline-icon {
+            position: absolute;
+            left: 18px;
+            top: 8px;
+            width: 28px;
+            height: 28px;
+            background: #ff4d6d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 0 0 4px #fff0f3;
+            z-index: 2;
+        }
+        .timeline-content {
+            background: rgba(255, 245, 245, 0.9);
+            backdrop-filter: blur(4px);
+            margin-left: 70px;
+            flex: 1;
+            border-radius: 32px;
+            padding: 18px 22px;
+            box-shadow: 0 12px 24px rgba(233, 96, 130, 0.15);
+            border: 1px solid rgba(255, 200, 215, 0.7);
+            transition: 0.2s;
+        }
+        .timeline-content:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 250, 250, 0.95);
+        }
+        .timeline-date {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #e84393;
+            letter-spacing: 1px;
+            display: inline-block;
+            background: #ffeef4;
+            padding: 4px 14px;
+            border-radius: 30px;
+            margin-bottom: 12px;
+        }
+        .timeline-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #9e2b50;
+            margin-bottom: 8px;
+            font-family: 'Dancing Script', cursive;
+        }
+        .timeline-desc {
+            color: #5f3c4a;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        .photo-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            border-top: 1px dashed #ffb8ce;
+            padding-top: 14px;
+        }
+        .timeline-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            object-fit: cover;
+            background: #ffdee8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #ff80a5;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            transition: 0.2s;
+            border: 2px solid white;
+        }
+        .upload-photo-btn {
+            background: #ffd0dd;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #b34368;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .upload-photo-btn:hover {
+            background: #ffb1c7;
+        }
+        /* 爱心额外点缀 */
+        .heart-icon-small {
+            color: #ff4d6d;
+            margin-left: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* 额外相册墙 (满足添加更多照片) */
+        .extra-gallery {
+            margin-top: 70px;
+            text-align: center;
+        }
+        .gallery-title {
+            font-size: 1.8rem;
+            font-family: 'Dancing Script', cursive;
+            color: #bf3f64;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .gallery-card {
+            background: rgba(255, 240, 245, 0.8);
+            border-radius: 28px;
+            padding: 12px;
+            backdrop-filter: blur(5px);
+            transition: 0.2s;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+        }
+        .gallery-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 20px;
+            background: #ffc0d0;
+        }
+        .add-photo-btn {
+            background: #ff85a8;
+            border: none;
+            margin-top: 20px;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .add-photo-btn:hover {
+            background: #e84393;
+            transform: scale(1.02);
+        }
+
+        /* 爱心点击特效 */
+        .click-heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.8rem;
+            animation: heartBurst 0.8s ease-out forwards;
+            z-index: 9999;
+        }
+        @keyframes heartBurst {
+            0% { transform: scale(0.3) translateY(0); opacity: 1; }
+            100% { transform: scale(1.4) translateY(-50px); opacity: 0; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* 响应式 */
+        @media (max-width: 680px) {
+            .container {
+                padding: 15px;
+            }
+            .timeline-content {
+                margin-left: 55px;
+                padding: 14px;
+            }
+            .timeline::before {
+                left: 22px;
+            }
+            .timeline-icon {
+                left: 10px;
+                width: 24px;
+                height: 24px;
+                font-size: 0.7rem;
+            }
+            .timeline-title {
+                font-size: 1.2rem;
+            }
+            .photo-area {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.75rem;
+            color: #cf7f9b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="fan-background"></div>
+<div class="floating-hearts" id="floatingHearts"></div>
+
+<div class="container">
+    <!-- 头部 -->
+    <div class="hero">
+        <h1>✨ 生日快乐，我的宝贝 ✨</h1>
+        <p>🎂 致全世界最特别的你 🎂</p>
+    </div>
+
+<!-- 音乐播放器 -->
+<div style="position:fixed; bottom:20px; right:20px; z-index:100;">
+    <audio id="bgMusic" loop>
+        <source src="love.mp3" type="audio/mpeg">
+    </audio>
+    <button id="musicBtn" style="background:#ff006e;color:white;border:none;border-radius:50%;width:50px;height:50px;cursor:pointer;">
+        ♫
+    </button>
+</div>
+
+<script>
+    // 音乐播放控制
+    document.getElementById('musicBtn').addEventListener('click', function() {
+        const music = document.getElementById('bgMusic');
+        if (music.paused) {
+            music.play();
+            this.innerHTML = '❚❚';
+        } else {
+            music.pause();
+            this.innerHTML = '♫';
+        }
+    });
+
+    // 页面加载时设置初始音量
+    window.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('bgMusic').volume = 0.3;
+    });
+</script>
+    <!-- 音乐播放器 + 添加音乐 -->
+    <div class="music-player">
+        <div class="player-controls">
+            <button class="play-btn" id="playPauseBtn"><i class="fas fa-play"></i></button>
+            <span class="audio-info" id="musicName">💖 未添加音乐 💖</span>
+        </div>
+        <label for="uploadMusicInput" class="upload-music">
+            <i class="fas fa-music"></i> 添加音乐
+        </label>
+        <input type="file" id="uploadMusicInput" accept="audio/*">
+        <audio id="bgAudio" loop scr="love.MP3"></audio>
+    </div>
+
+    <!-- 时间轴六个节点 -->
+    <div class="timeline" id="timelineContainer"></div>
+
+    <!-- 额外照片墙 - 可添加更多照片 -->
+    <div class="extra-gallery">
+        <div class="gallery-title">
+            <i class="fas fa-heart" style="color:#ff4d6d;"></i> 我们的甜蜜瞬间 <i class="fas fa-heart" style="color:#ff4d6d;"></i>
+        </div>
+        <div class="gallery-grid" id="galleryGrid">
+            <!-- 预置几个示例照片占位，用户可上传覆盖 -->
+            <div class="gallery-card">
+                <img class="gallery-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ffb7c5'/%3E%3Ctext x='50' y='55' font-size='14' text-anchor='middle' fill='%239e3c5e'%3E❤️ 合照%3C/text%3E%3C/svg%3E" alt="placeholder">
+            </div>
+            <div class="gallery-card">
+                <img class="gallery-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9eb5'/%3E%3Ctext x='50' y='55' font-size='14' text-anchor='middle' fill='%239e3c5e'%3E📸 时光%3C/text%3E%3C/svg%3E" alt="placeholder">
+            </div>
+            <div class="gallery-card">
+                <img class="gallery-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff88ae'/%3E%3Ctext x='50' y='55' font-size='14' text-anchor='middle' fill='%239e3c5e'%3E🌸 回忆%3C/text%3E%3C/svg%3E" alt="placeholder">
+            </div>
+        </div>
+        <button class="add-photo-btn" id="addGalleryPhotoBtn"><i class="fas fa-plus-circle"></i> 添加更多照片</button>
+    </div>
+    <footer>💗 永远爱你，每一帧都是我们的故事 💗</footer>
+</div>
+
+<script>
+    // ----------------------------- 时间轴数据（六个节点）--------------------------------
+    const timelineData = [
+        {
+            date: "2025.7.11",
+            title: "梦开始的地方",
+            desc: "那一天的阳光正好，你笑起来像星星一样耀眼。缘分让我们在人群中看见彼此。",
+            photoSrc: null   // 初始无真实照片，显示爱心占位
+        },
+        {
+            date: "2023.08.14",
+            title: "甜蜜告白",
+            desc: "鼓起勇气说出喜欢你，原来你也恰好心动。从此世界都变得甜了起来。",
+            photoSrc: "life.jpg"
+        },
+        {
+            date: "2023.12.25",
+            title: "第一个圣诞节",
+            desc: "漫天雪花中紧握你的手，圣诞树下的约定要一直一直在一起。",
+            photoSrc: null
+        },
+        {
+            date: "2024.03.08",
+            title: "浪漫旅行",
+            desc: "一起去看海，在沙滩上写下我们的名字，海浪都为我们祝福。",
+            photoSrc: null
+        },
+        {
+            date: "2024.08.10",
+            title: "周年纪念",
+            desc: "一周年快乐，每个平凡日子因你而不凡。爱你，是我最幸福的事。",
+            photoSrc: null
+        },
+        {
+            date: "2025.04.03",
+            title: "生日快乐✨",
+            desc: "今天你是全世界的主角！愿往后余生，欢笑与你相伴，我会一直在你身边。",
+            photoSrc: null
+        }
+    ];
+
+    // 存储每个节点的照片URL (用于替换)
+    let timelinePhotos = ["life.jpg","图片1.png"];
+
+    // 生成时间轴DOM
+    function buildTimeline() {
+        const container = document.getElementById('timelineContainer');
+        container.innerHTML = '';
+        timelineData.forEach((item, idx) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'timeline-item';
+            itemDiv.style.setProperty('--order', idx);
+            // 左侧小图标
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'timeline-icon';
+            iconDiv.innerHTML = '<i class="fas fa-heart"></i>';
+            // 内容区域
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'timeline-content';
+            // 日期
+            const dateSpan = document.createElement('div');
+            dateSpan.className = 'timeline-date';
+            dateSpan.innerText = item.date;
+            // 标题
+            const titleH3 = document.createElement('h3');
+            titleH3.className = 'timeline-title';
+            titleH3.innerText = item.title;
+            // 描述
+            const descP = document.createElement('p');
+            descP.className = 'timeline-desc';
+            descP.innerText = item.desc;
+            // 照片区域
+            const photoArea = document.createElement('div');
+            photoArea.className = 'photo-area';
+            const photoImg = document.createElement('img');
+            photoImg.className = 'timeline-photo';
+            // 如果已有照片则显示，否则显示爱心emoji占位图（data:image 透明心形风格）
+            if (timelinePhotos[idx]) {
+                photoImg.src = timelinePhotos[idx];
+            } else {
+                // 设置爱心占位图 SVG
+                photoImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ffe2ec'/%3E%3Ctext x='50' y='67' font-size='42' text-anchor='middle' fill='%23ff6b8b'%3E❤️%3C/text%3E%3C/svg%3E";
+            }
+            photoImg.style.objectFit = "cover";
+            // 上传按钮
+            const uploadPhotoBtn = document.createElement('button');
+            uploadPhotoBtn.className = 'upload-photo-btn';
+            uploadPhotoBtn.innerHTML = '<i class="fas fa-camera"></i> 添加照片';
+            // 添加照片的事件，更新当前节点图片
+            uploadPhotoBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.onchange = (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            const imgUrl = ev.target.result;
+                            timelinePhotos[idx] = imgUrl;
+                            photoImg.src = imgUrl;
+                            // 可选：提示爱心消息
+                            showHeartTip('📸 照片已添加', '#ff6f91');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                fileInput.click();
+            });
+            photoArea.appendChild(photoImg);
+            photoArea.appendChild(uploadPhotoBtn);
+            // 加一个小爱心图标
+            const heartSpan = document.createElement('span');
+            heartSpan.className = 'heart-icon-small';
+            heartSpan.innerHTML = '<i class="fas fa-heart"></i>';
+            photoArea.appendChild(heartSpan);
+            
+            contentDiv.appendChild(dateSpan);
+            contentDiv.appendChild(titleH3);
+            contentDiv.appendChild(descP);
+            contentDiv.appendChild(photoArea);
+            itemDiv.appendChild(iconDiv);
+            itemDiv.appendChild(contentDiv);
+            container.appendChild(itemDiv);
+        });
+    }
+
+    // 漂浮爱心背景生成器
+    function createFloatingHearts() {
+        const heartsContainer = document.getElementById('floatingHearts');
+        setInterval(() => {
+            const heartEl = document.createElement('div');
+            heartEl.className = 'heart';
+            heartEl.innerHTML = ['❤️', '💖', '💗', '💓', '🌸', '🎀'][Math.floor(Math.random() * 6)];
+            heartEl.style.left = Math.random() * 100 + '%';
+            heartEl.style.fontSize = (Math.random() * 20 + 12) + 'px';
+            heartEl.style.animationDuration = (Math.random() * 6 + 5) + 's';
+            heartEl.style.animationDelay = (Math.random() * 3) + 's';
+            heartEl.style.opacity = Math.random() * 0.5 + 0.3;
+            heartsContainer.appendChild(heartEl);
+            setTimeout(() => {
+                heartEl.remove();
+            }, 8000);
+        }, 800);
+    }
+    
+    // 点击页面任意位置出现爱心特效
+    function clickHeartEffect(e) {
+        const heart = document.createElement('div');
+        heart.className = 'click-heart';
+        heart.innerHTML = '❤️';
+        heart.style.left = e.pageX - 15 + 'px';
+        heart.style.top = e.pageY - 20 + 'px';
+        document.body.appendChild(heart);
+        setTimeout(() => {
+            heart.remove();
+        }, 800);
+    }
+    
+    // 辅助提示小动画（短暂通知）
+    function showHeartTip(msg, color = '#e84393') {
+        const tip = document.createElement('div');
+        tip.innerText = msg;
+        tip.style.position = 'fixed';
+        tip.style.bottom = '30px';
+        tip.style.left = '50%';
+        tip.style.transform = 'translateX(-50%)';
+        tip.style.backgroundColor = color;
+        tip.style.color = 'white';
+        tip.style.padding = '8px 20px';
+        tip.style.borderRadius = '50px';
+        tip.style.fontSize = '0.9rem';
+        tip.style.fontWeight = 'bold';
+        tip.style.zIndex = '9999';
+        tip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+        tip.style.backdropFilter = 'blur(4px)';
+        document.body.appendChild(tip);
+        setTimeout(() => {
+            tip.style.opacity = '0';
+            setTimeout(() => tip.remove(), 400);
+        }, 1800);
+    }
+
+    // ---------- 音乐控制逻辑 ----------
+    const audio = document.getElementById('bgAudio');
+    const playBtn = document.getElementById('playPauseBtn');
+    const musicNameSpan = document.getElementById('musicName');
+    const musicUpload = document.getElementById('uploadMusicInput');
+    let currentMusicFile = null;
+    
+    playBtn.addEventListener('click', () => {
+        if (!audio.src || audio.src === '') {
+            showHeartTip('🎵 请先添加一首音乐哟~', '#ff9eb5');
+            return;
+        }
+        if (audio.paused) {
+            audio.play().catch(e => {
+                console.log("播放需要用户交互", e);
+                showHeartTip('💖 点击页面任意地方后，再点播放~', '#ff6f91');
+            });
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+            audio.pause();
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    });
+    
+    // 监听音频播放结束重置按钮图标
+    audio.addEventListener('ended', () => {
+        playBtn.innerHTML = '<i class="fas fa-play"></i>';
+    });
+    
+    musicUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('audio/')) {
+            const url = URL.createObjectURL(file);
+            audio.src = url;
+            audio.load();
+            // 尝试播放需要交互，但用户主动上传后自动播放会被浏览器阻止，不自动播放，但用户可手动点击播放
+            musicNameSpan.innerText = `🎵 ${file.name.substring(0, 20)}`;
+            showHeartTip('🎶 音乐加载完成，点击播放按钮吧！', '#ff85a8');
+            // 重置播放按钮
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            // 若之前暂停状态
+        } else {
+            showHeartTip('请上传有效的音频文件', '#e84393');
+        }
+    });
+    
+    // 额外相册功能 (满足添加照片到照片墙)
+    const galleryGrid = document.getElementById('galleryGrid');
+    const addGalleryBtn = document.getElementById('addGalleryPhotoBtn');
+    
+    function addPhotoToGallery(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const galleryCard = document.createElement('div');
+            galleryCard.className = 'gallery-card';
+            const img = document.createElement('img');
+            img.className = 'gallery-img';
+            img.src = e.target.result;
+            galleryCard.appendChild(img);
+            // 可选删除按钮？为了整洁不加，但是爱心长按删除?为了简单起见，不搞复杂，用户可刷新重新添加，但完美。
+            galleryGrid.appendChild(galleryCard);
+            showHeartTip('✨ 新照片已加入甜蜜相册 ✨', '#ff6f91');
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    addGalleryBtn.addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.multiple = true; // 支持多选
+        fileInput.onchange = (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => addPhotoToGallery(file));
+        };
+        fileInput.click();
+    });
+    
+    // 给现有的相册卡片也可以支持替换/增加? 为了更好的“添加照片”体验，已经可以通过按钮无限添加，另外时间轴各节点添加照片，完全满足照片添加需求。
+    // 而且还可以让现有相册卡片也支持上传替换，进一步增加自由度（需求满足更全面）
+    function enableGalleryCardUpload() {
+        // 为已有相册卡片添加点击上传替换功能 (更友好)
+        const existingCards = document.querySelectorAll('.gallery-card');
+        existingCards.forEach(card => {
+            const imgElem = card.querySelector('.gallery-img');
+            if (imgElem && !card.hasAttribute('data-listener')) {
+                card.setAttribute('data-listener', 'true');
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const uploader = document.createElement('input');
+                    uploader.type = 'file';
+                    uploader.accept = 'image/*';
+                    uploader.onchange = (ev) => {
+                        const f = ev.target.files[0];
+                        if (f) {
+                            const fr = new FileReader();
+                            fr.onload = (ev2) => {
+                                imgElem.src = ev2.target.result;
+                                showHeartTip('❤️ 照片已更新', '#ff88ae');
+                            };
+                            fr.readAsDataURL(f);
+                        }
+                    };
+                    uploader.click();
+                });
+            }
+        });
+    }
+    
+    // 监听动态新增的相册卡片（MutationObserver监听相册区域变化，动态增加点击替换）
+    const observer = new MutationObserver(() => {
+        enableGalleryCardUpload();
+    });
+    observer.observe(galleryGrid, { childList: true, subtree: true });
+    
+    // 初始渲染时间轴
+    buildTimeline();
+    createFloatingHearts();
+    enableGalleryCardUpload();  // 初始卡片上传替换
+    
+    // 页面爱心点击效果
+    document.body.addEventListener('click', (e) => {
+        // 防止点击按钮时重复触发太多，但是效果很美
+        clickHeartEffect(e);
+        // 为了音乐自动播放策略：用户首次点击页面任何地方时如果音频有src并且未播放, 可以尝试播放, 根据用户预期但需要不自动骚扰, 但为了体验如果用户未播放且音乐已经存在，建议不自动，但点击爱心后可以允许自动播放一次? 不做强制以免烦人，但用户主动按播放键即可。
+    });
+    
+    // 给所有带照片上传的时间轴图片区域额外的点缀：预置信息，增加爱心氛围
+    // 显示一段额外提示: 可以初始化完成后做一个小彩蛋
+    window.addEventListener('load', () => {
+        showHeartTip('🎂 亲爱的，生日快乐！点击爱心或者任意处会有惊喜哟~', '#ff6f91');
+        // 自动产生一些漂浮额外爱心
+        for(let i=0;i<20;i++) {
+            setTimeout(() => {
+                const fakeEvent = { pageX: Math.random() * window.innerWidth, pageY: Math.random() * window.innerHeight };
+                clickHeartEffect(fakeEvent);
+            }, i*200);
+        }
+    });
+</script>
+</body>
+</html>
